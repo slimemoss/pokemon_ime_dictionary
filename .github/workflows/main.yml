@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+  schedule:
+    - cron: "30 3 15 * *"
 
 permissions:
   contents: write
@@ -19,14 +21,22 @@ jobs:
           python-version: "3.13"
       - run: pip install -r requirements.txt
       - run: python main.py > all.txt
+
       - name: Check diff with latest release
         id: diff
         run: curl -s -L https://github.com/slimemoss/pokemon_ime_dictionary/releases/latest/download/all.txt | diff - all.txt || echo "diff_found=true" >> $GITHUB_OUTPUT
+
+      - name: Compute release tag
+        id: tag
+        run: echo "tag=${GITHUB_REF_NAME:-$(date +'%Y.%m.%d')}" >> $GITHUB_OUTPUT
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
-        if: steps.diff.outputs.diff_found == 'true'        
+        if: steps.diff.outputs.diff_found == 'true'
         with:
+          tag_name: ${{ steps.tag.outputs.tag }}
           files: all.txt
+
       - name: No diff message
         if: steps.diff.outputs.diff_found != 'true'
         run: echo "No differences found. Release is skipped."
