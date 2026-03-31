@@ -1,0 +1,6 @@
+pydantic
+libcst
+isort
+autopep8
+requests-cache
+jaconv

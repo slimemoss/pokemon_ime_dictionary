@@ -1,0 +1,4 @@
+**/*~
+**/http_cache.sqlite
+.venv
+__pycache__
