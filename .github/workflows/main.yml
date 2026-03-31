@@ -19,6 +19,14 @@ jobs:
           python-version: "3.13"
       - run: pip install -r requirements.txt
       - run: python main.py > all.txt
-      - uses: softprops/action-gh-release@v2
+      - name: Check diff with latest release
+        id: diff
+        run: curl -s -L https://github.com/slimemoss/pokemon_ime_dictionary/releases/latest/download/all.txt | diff - all.txt || echo "diff_found=true" >> $GITHUB_OUTPUT
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: steps.diff.outputs.diff_found == 'true'        
         with:
           files: all.txt
+      - name: No diff message
+        if: steps.diff.outputs.diff_found != 'true'
+        run: echo "No differences found. Release is skipped."
